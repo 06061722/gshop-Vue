@@ -9,7 +9,7 @@
         </div>
       </div>
       <div class="login_content">
-        <form>
+        <form @submit.prevent="login">
           <div :class="{on: LoginWay}">
             <section class="login_message">
               <input type="tel" maxlength="11" placeholder="手机号" v-model="phone">
@@ -21,7 +21,7 @@
               >{{ computeTime>0 ? `已发送(${computeTime}s)` : '获取验证码' }}</button>
             </section>
             <section class="login_verification">
-              <input type="tel" maxlength="8" placeholder="验证码" v-model="code">
+              <input type="tel" maxlength="6" placeholder="验证码" v-model="code">
             </section>
             <section class="login_hint">
               温馨提示：未注册硅谷外卖帐号的手机号，登录时将自动注册，且代表已同意
@@ -43,11 +43,17 @@
               </section>
               <section class="login_message">
                 <input type="text" maxlength="11" placeholder="验证码" v-model="captcha">
-                <img class="get_verification" src="./images/captcha.svg" alt="captcha">
+                <img
+                  class="get_verification"
+                  src="http://localhost:4000/captcha"
+                  alt="captcha"
+                  @click="getCaptcha"
+                  ref="captcha"
+                >
               </section>
             </section>
           </div>
-          <button class="login_submit" @click="login">登录</button>
+          <button class="login_submit">登录</button>
         </form>
         <a href="javascript:;" class="about_us">关于我们</a>
       </div>
@@ -55,11 +61,17 @@
         <i class="iconfont icon-jiantou2"></i>
       </a>
     </div>
+    <AlertTip :alertText="alertText" v-show="alertShow" @closeTip="closeTip"></AlertTip>
   </section>
 </template>
 
 <script>
+import AlertTip from "../../components/AlertTip/AlertTip.vue";
+import { reqSendCode, reqPwdLogin, reqSmsLogin } from "../../api/index.js";
 export default {
+  components: {
+    AlertTip
+  },
   data() {
     return {
       LoginWay: true,
@@ -69,39 +81,85 @@ export default {
       name: "",
       pwd: "",
       code: "",
-      captcha: ""
+      captcha: "",
+      alertText: "",
+      alertShow: false
     };
   },
   methods: {
-    getCode() {
+    showAlert(alertText) {
+      this.alertText = alertText;
+      this.alertShow = true;
+    },
+    async getCode() {
       if (!this.computeTime) {
         this.computeTime = 30;
-        const intervalId = setInterval(() => {
+        this.intervalId = setInterval(() => {
           if (this.computeTime <= 0) {
-            clearInterval(intervalId);
+            clearInterval(this.intervalId);
           }
           this.computeTime--;
         }, 1000);
+        const result = await reqSendCode(this.phone);
+        if (result.code === 1) {
+          this.showAlert(result.msg);
+          if (this.computeTime) {
+            this.computeTime = 0;
+            clearInterval(this.intervalId);
+            this.intervalId = undefined;
+          }
+        }
       }
     },
-    login () {
+    async login() {
+      let result;
       if (this.LoginWay) {
-        const {rightphone, phone, code} = this
+        const { rightphone, phone, code } = this;
         if (!rightphone) {
-          
+          this.showAlert("手机号不正确");
+          return;
         } else if (!/^\d{6}$/.test(code)) {
-
+          this.showAlert("验证码必须是6位数字");
+          return;
         }
+        result = await reqSmsLogin({ phone, code });
       } else {
-        const {name, pwd, captcha} = this
+        const { name, pwd, captcha } = this;
         if (!name) {
-          
+          this.showAlert("用户名必须指定");
+          return;
         } else if (!pwd) {
-          
+          this.showAlert("密码必须指定");
+          return;
         } else if (!captcha) {
-          
+          this.showAlert("验证码必须指定");
+          return;
         }
-      } 
+        result = await reqPwdLogin({ name, pwd, captcha });
+      }
+      if (this.computeTime) {
+        this.computeTime = 0;
+        clearInterval(this.intervalId);
+        this.intervalId = undefined;
+      }
+      if (result.code === 0) {
+        const user = result.data;
+        console.log(user)
+        this.$store.dispatch('recordUser', user)
+        this.$router.replace("/profile");
+      } else {
+        this.getCaptcha();
+        const msg = result.msg;
+        this.showAlert(msg);
+      }
+    },
+    closeTip() {
+      this.alertShow = false;
+      this.alertText = "";
+    },
+    getCaptcha() {
+      this.$refs.captcha.src =
+        "http://localhost:4000/captcha?time=" + Date.now();
     }
   },
   computed: {

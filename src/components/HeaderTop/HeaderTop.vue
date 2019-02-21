@@ -17,7 +17,7 @@ export default {
     return {};
   },
   methods: {},
-  mounted() {}
+
 };
 </script>
 <style lang="stylus" scoped>
