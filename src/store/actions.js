@@ -1,5 +1,5 @@
-import { RECEIVE_ADDRESS, RECEIVE_CATEGORYS, RECEIVE_SHOPS, RECEIVE_USER_INFO, RESET_USER_INFO } from "./mutation-types";
-import { reqAddress, reqFoodCategorys, reqShops, reqUserInfo, reqLogout } from "../api/index.js";
+import { RECEIVE_ADDRESS, RECEIVE_CATEGORYS, RECEIVE_SHOPS, RECEIVE_USER_INFO, RESET_USER_INFO, RECEIVE_GOODS, RECEIVE_RATINGS, RECEIVE_INFO } from "./mutation-types";
+import { reqAddress, reqFoodCategorys, reqShops, reqUserInfo, reqLogout, reqShopGoods, reqShopRatings, reqShopInfo } from "../api/index.js";
 
 export default {
   async getAddress({ commit, state }) {
@@ -39,5 +39,26 @@ export default {
     if (result.code === 0) {
       commit(RESET_USER_INFO)
     }
-  }
+  }, 
+  async getShopInfo ({commit}) {
+    const result = await reqShopInfo()
+    if (result.code === 0) {
+      const info = result.data
+      commit(RECEIVE_INFO, info)
+    }
+  },
+  async getShopRatings ({commit}) {
+    const result = await reqShopRatings()
+    if (result.code === 0) {
+      const ratings = result.data
+      commit(RECEIVE_INFO, ratings)
+    }
+  },
+  async getShopGoods ({commit}) {
+    const result = await reqShopGoods()
+    if (result.code === 0) {
+      const goods = result.data
+      commit(RECEIVE_INFO, goods)
+    }
+  },
 }
