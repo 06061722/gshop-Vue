@@ -64,6 +64,7 @@ import { mapState } from "vuex";
 import CartControl from "../../../components/CartControl/CartControl.vue";
 import Food from "../../../components/Food/Food.vue";
 import ShopCart from "../../../components/ShopCart/ShopCart.vue";
+
 export default {
   mounted() {
     this.$store.dispatch("getShopGoods", () => {
