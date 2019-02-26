@@ -8,5 +8,6 @@ export default {
   goods: [],
   ratings: [], 
   info: {},
-  cartFood: []
+  cartFood: [],
+  searchShops: []
 }

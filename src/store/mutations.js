@@ -1,6 +1,8 @@
-import { RECEIVE_ADDRESS, RECEIVE_CATEGORYS, RECEIVE_SHOPS, 
-  RECEIVE_USER_INFO, RESET_USER_INFO, RECEIVE_GOODS, RECEIVE_RATINGS, 
-  RECEIVE_INFO, INCRESE_FOOD_COUNT, DECRESE_FOOD_COUNT, CLEAR_CART} from "./mutation-types";
+import {
+  RECEIVE_ADDRESS, RECEIVE_CATEGORYS, RECEIVE_SHOPS,
+  RECEIVE_USER_INFO, RESET_USER_INFO, RECEIVE_GOODS, RECEIVE_RATINGS,
+  RECEIVE_INFO, INCRESE_FOOD_COUNT, DECRESE_FOOD_COUNT, CLEAR_CART, RECEIVE_SEARCH_SHOPS
+} from "./mutation-types";
 import Vue from "vue";
 
 export default {
@@ -46,7 +48,10 @@ export default {
   },
   [CLEAR_CART](state) {
     state.cartFood.forEach(food => food.count = 0);
-    
+
     state.cartFood = []
+  },
+  [RECEIVE_SEARCH_SHOPS](state, searchShops) {
+    state.searchShops = searchShops
   },
 }

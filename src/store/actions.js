@@ -1,11 +1,11 @@
 import {
   RECEIVE_ADDRESS, RECEIVE_CATEGORYS, RECEIVE_SHOPS, RECEIVE_USER_INFO,
   RESET_USER_INFO, RECEIVE_GOODS, RECEIVE_RATINGS, RECEIVE_INFO,
-  INCRESE_FOOD_COUNT, DECRESE_FOOD_COUNT, CLEAR_CART
+  INCRESE_FOOD_COUNT, DECRESE_FOOD_COUNT, CLEAR_CART, RECEIVE_SEARCH_SHOPS
 } from "./mutation-types";
 import {
   reqAddress, reqFoodCategorys, reqShops, reqUserInfo,
-  reqLogout, reqShopGoods, reqShopRatings, reqShopInfo
+  reqLogout, reqShopGoods, reqShopRatings, reqShopInfo, reqSearchShop
 } from "../api/index.js";
 
 export default {
@@ -79,5 +79,13 @@ export default {
   }, 
   clearCart ({commit}) {
     commit(CLEAR_CART)
+  },
+  async searchShops({ commit, state }, keyword) {
+    const geohash = state.latitude + ',' + state.longitude
+    const result = await reqSearchShop(geohash, keyword)
+    if (result.code === 0) {
+      const searchShops = result.data
+      commit(RECEIVE_SEARCH_SHOPS, searchShops)
+    }
   }
 }
